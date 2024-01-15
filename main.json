@@ -1,0 +1,234 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Template to create an EC2 server in private subnet with RDS and deploy a cloudfront with angular app from s3",
+  "Metadata": {},
+  "Parameters": {
+    "tagKey": {
+      "Default": "Usage",
+      "Description": "TagKey to assign for all resources created using this template",
+      "Type": "String"
+  },
+  "tagValue": {
+      "Default": "cloudformationtest",
+      "Description": "TagValue to assign for all resources created using this template",
+      "Type": "String"
+  },
+  "VPCcidrBlock": {
+      "Default": "10.1.0.0/16",
+      "Description": "CIDR block for VPC1",
+      "Type": "String"
+  },
+  "privsubnetcidrBlock": {
+    "Default": "10.1.1.0/24",
+    "Description": "CIDR block for Private Subnet",
+    "Type": "String"
+},
+"privsubnet2cidrBlock": {
+    "Default": "10.1.3.0/24",
+    "Description": "CIDR block for Private Subnet",
+    "Type": "String"
+},
+"pubsubnetcidrBlock": {
+    "Default": "10.1.2.0/24",
+    "Description": "CIDR block for for Public Subnet",
+    "Type": "String"
+},
+"availablityZone1": {
+    "Default": "us-east-1f",
+    "Description": "Avilability Zone1 for Subnet",
+    "Type": "String"
+},
+"availablityZone2": {
+    "Default": "us-east-1e",
+    "Description": "Avilability Zone2 for Subnet",
+    "Type": "String"
+}
+  },
+  "Mappings": {},
+  "Conditions": {},
+  "Resources": {
+    "NestedStackA": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./VPC.json",
+        "Parameters": {
+          "tagKey": {
+            "Ref":"tagKey"
+          },
+          "tagValue": {
+            "Ref":"tagValue"
+          },
+          "VPCcidrBlock": {
+            "Ref":"VPCcidrBlock"
+          }
+        }
+      }
+    },
+    "NestedStackB": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./subnet.json",
+        "Parameters": {
+          "VPC1": {
+            "Fn::GetAtt": [
+              "NestedStackA",
+              "Outputs.VPC1"
+            ]
+          },
+          "privsubnetcidrBlock": {
+            "Ref":"privsubnetcidrBlock"
+          },
+          "privsubnet2cidrBlock": {
+            "Ref":"privsubnet2cidrBlock"
+          },
+          "pubsubnetcidrBlock": {
+            "Ref":"pubsubnetcidrBlock"
+          },
+          "availablityZone1": {
+            "Ref":"availablityZone1"
+          },
+          "availablityZone2": {
+            "Ref":"availablityZone2"
+          }
+        }
+      }
+    },
+    "NestedStackC": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./gateway.json",
+        "Parameters": {
+          "VPC1": {
+            "Fn::GetAtt": [
+              "NestedStackA",
+              "Outputs.VPC1"
+            ]
+          },
+          "pubsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.pubsubnet"
+            ]
+          }
+        }
+      }
+    },
+    "NestedStackD": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./routetable.json",
+        "Parameters": {
+          "VPC1": {
+            "Fn::GetAtt": [
+              "NestedStackA",
+              "Outputs.VPC1"
+            ]
+          },
+          "VPC1internetGateway": {
+            "Fn::GetAtt": [
+              "NestedStackC",
+              "Outputs.VPC1internetGateway"
+            ]
+          },
+          "VPC1NATGateway": {
+            "Fn::GetAtt": [
+              "NestedStackC",
+              "Outputs.VPC1NATGateway"
+            ]
+          },
+          "pubsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.pubsubnet"
+            ]
+          },
+          "privsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.privsubnet"
+            ]
+          },
+          "privsubnet2": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.privsubnet2"
+            ]
+          }
+        }
+      }
+    },
+    "NestedStackE": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./EC2.json",
+        "Parameters": {
+          "VPC1": {
+            "Fn::GetAtt": [
+              "NestedStackA",
+              "Outputs.VPC1"
+            ]
+          },
+          "pubsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.pubsubnet"
+            ]
+          },
+          "privsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.privsubnet"
+            ]
+          }
+        }
+      }
+    },
+    "NestedStackF": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./RDS.json",
+        "Parameters": {
+          "VPC1": {
+            "Fn::GetAtt": [
+              "NestedStackA",
+              "Outputs.VPC1"
+            ]
+          },
+          "pubsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.pubsubnet"
+            ]
+          },
+          "privsubnet": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.privsubnet"
+            ]
+          },
+          "privsubnet2": {
+            "Fn::GetAtt": [
+              "NestedStackB",
+              "Outputs.privsubnet2"
+            ]
+          },
+          "serverEC2sg": {
+            "Fn::GetAtt": [
+              "NestedStackE",
+              "Outputs.serverEC2sg"
+            ]
+          }
+
+        }
+      }
+    },
+    "NestedStackG": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "./cloudfront.json"
+      }
+    }
+
+  },
+  "Outputs": {}
+}

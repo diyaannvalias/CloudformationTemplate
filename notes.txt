@@ -1,0 +1,26 @@
+cloudformation:
+---------------------
+template:
+    Resources: services are created here
+
+        "Resources": {
+        "<resource_name>": {
+            "Type": "AWS::EC2::Instance",       ->type of instance
+            "Properties": {
+                "SecurityGroups": [
+                    {
+                        "Ref": "InstanceSecurityGroup"
+                    }
+                ],
+                "KeyName": "mykey",
+                "ImageId": ""
+            }
+        }
+        }
+
+Nested stacks : to run splited cloudformation template(main.json,vpc.json)
+cloudformation package: To package all the nested stack json files together to add in cloudformation
+    aws cloudformation package \
+    --template-file template.yaml \
+    --s3-bucket <your bucket name here> \
+    --output-template-file packaged.yaml

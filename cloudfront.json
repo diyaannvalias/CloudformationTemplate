@@ -1,0 +1,364 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {
+    
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+      "WAFWebIPSet": {
+        "Type": "AWS::WAFv2::IPSet",
+        "Properties": {
+          "Name": "CFWAFWebIPSet",
+          "Description": "My IP Set description",
+          "Scope": "CLOUDFRONT",
+          "IPAddressVersion": "IPV4",
+          "Addresses": [
+            "10.5.26.146/32"
+          ]
+        }
+      },
+      "WAFRuleGroup": {
+        "Type": "AWS::WAFv2::RuleGroup",
+        "Properties": {
+          "Name": "CFWAFRuleGroup",
+          "Scope": "CLOUDFRONT",
+          "Description": "SampleRuleGroup",
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "SampleRuleGroupMetrics"
+          },
+          "CustomResponseBodies": {
+            "CustomResponseBodyKey1": {
+              "ContentType": "TEXT_PLAIN",
+              "Content": "this is a plain text"
+            },
+            "CustomResponseBodyKey2": {
+              "ContentType": "APPLICATION_JSON",
+              "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+            },
+            "CustomResponseBodyKey3": {
+              "ContentType": "TEXT_HTML",
+              "Content": "<html>HTML text content</html>"
+            }
+          },
+          "Capacity": 1000,
+          "Rules": [
+            {
+              "Name": "test",
+              "Priority": 0,
+              "Action": {
+                "Allow": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "test"
+              },
+              "Statement": {
+                "IPSetReferenceStatement": {
+                  "ARN": {
+                    "Fn::GetAtt": [
+                      "WAFWebIPSet",
+                      "Arn"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "WebACL": {
+        "Type": "AWS::WAFv2::WebACL",
+        "Properties": {
+          "Name": "CFWebACL1",
+          "Scope": "CLOUDFRONT",
+          "Description": "This is an example WebACL",
+          "DefaultAction": {
+            "Allow": {
+              "CustomRequestHandling": {
+                "InsertHeaders": [
+                  {
+                    "Name": "AllowActionHeader1Name",
+                    "Value": "AllowActionHeader1Value"
+                  },
+                  {
+                    "Name": "AllowActionHeader2Name",
+                    "Value": "AllowActionHeader2Value"
+                  }
+                ]
+              }
+            }
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "ExampleWebACLMetric"
+          },
+          "CustomResponseBodies": {
+            "CustomResponseBodyKey1": {
+              "ContentType": "TEXT_PLAIN",
+              "Content": "this is a plain text"
+            },
+            "CustomResponseBodyKey2": {
+              "ContentType": "APPLICATION_JSON",
+              "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+            },
+            "CustomResponseBodyKey3": {
+              "ContentType": "TEXT_HTML",
+              "Content": "<html>HTML text content</html>"
+            }
+          },
+          "Rules": [
+            {
+              "Name": "test",
+              "Priority": 1,
+              "Statement": {
+                "RuleGroupReferenceStatement": {
+                  "ARN": {
+                    "Fn::GetAtt": [
+                      "WAFRuleGroup",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "test"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesAdminProtectionRuleSet",
+              "Priority": 2,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesAdminProtectionRuleSet"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesAdminProtectionRuleSet"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesAmazonIpReputationList",
+              "Priority": 3,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesAmazonIpReputationList"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesAmazonIpReputationList"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesAnonymousIpList",
+              "Priority": 4,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesAnonymousIpList"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesAnonymousIpList"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesCommonRuleSet",
+              "Priority": 5,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesCommonRuleSet"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesCommonRuleSet"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesKnownBadInputsRuleSet",
+              "Priority": 6,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesKnownBadInputsRuleSet"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesLinuxRuleSet",
+              "Priority": 7,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesLinuxRuleSet"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesLinuxRuleSet"
+              }
+            },
+            {
+              "Name": "AWS-AWSManagedRulesUnixRuleSet",
+              "Priority": 8,
+              "Statement": {
+                "ManagedRuleGroupStatement": {
+                  "VendorName": "AWS",
+                  "Name": "AWSManagedRulesUnixRuleSet"
+                }
+              },
+              "OverrideAction": {
+                "None": {}
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "AWS-AWSManagedRulesUnixRuleSet"
+              }
+            }
+          ]
+        }
+      },
+      "MyS3Bucket": {
+        "Type": "AWS::S3::Bucket",
+        "Properties": {
+          "BucketName": "cfnbuckettest2345"
+        }
+      },
+      "MyCloudFrontOAI": {
+        "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+        "Properties": {
+          "CloudFrontOriginAccessIdentityConfig": {
+            "Comment": "My Origin Access Identity Comment"
+          }
+        }
+      },
+      "MyCloudFrontDistribution": {
+        "Type": "AWS::CloudFront::Distribution",
+        "Properties": {
+          "DistributionConfig": {
+            "Origins": [
+              {
+                "DomainName": "cfnbuckettest2345.s3.amazonaws.com",
+                "Id": "cfnbuckettest2345",
+                "S3OriginConfig": {
+                  "OriginAccessIdentity": {
+                    "Fn::Sub": "origin-access-identity/cloudfront/${MyCloudFrontOAI}"
+                  }
+                }
+              }
+            ],
+            "WebACLId": { "Fn::GetAtt": ["WebACL", "Arn"] },
+            "DefaultCacheBehavior": {
+              "TargetOriginId": "cfnbuckettest2345",
+              "ForwardedValues": {
+                "QueryString": false,
+                "Cookies": {
+                  "Forward": "none"
+                }
+              },
+              "ViewerProtocolPolicy": "allow-all"
+            },
+            "Enabled": true,
+            "DefaultRootObject": "index.html",
+            "PriceClass": "PriceClass_All",
+            "ViewerCertificate": {
+              "CloudFrontDefaultCertificate": true
+            }
+          }
+        }
+      },
+      "MyBucketPolicy": {
+        "Type": "AWS::S3::BucketPolicy",
+        "Properties": {
+          "Bucket": {
+            "Ref": "MyS3Bucket"
+          },
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "CanonicalUser": {
+                    "Fn::GetAtt": [
+                      "MyCloudFrontOAI",
+                      "S3CanonicalUserId"
+                    ]
+                  }
+                },
+                "Action": "s3:GetObject",
+                "Resource": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "MyS3Bucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Outputs": {
+
+    }
+}

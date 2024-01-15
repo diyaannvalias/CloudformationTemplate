@@ -1,0 +1,55 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Network Creation with vpc,subnet,routetable,vpc-securitygroup",
+    "Metadata": {},
+    "Parameters": {
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "VPCcidrBlock": {
+            "Default": "10.1.0.0/16",
+            "Description": "CIDR block for VPC1",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "VPC1": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "VPCcidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFVPC1"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "VPC1": {
+            "Value": {
+                "Ref": "VPC1"
+            }
+        }
+    }
+}

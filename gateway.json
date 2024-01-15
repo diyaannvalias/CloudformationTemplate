@@ -1,0 +1,102 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "pubsubnet": {
+            "Type": "String",
+            "Description": "publicsubnet id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "VPC1internetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFVPC1internetGateway"
+                    }
+                ]
+            }
+        },
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "InternetGatewayId": {
+                    "Ref": "VPC1internetGateway"
+                }
+            }
+        },
+        "VPC1NATGateway": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "VPC1NATGatewayEIP",
+                        "AllocationId"
+                    ]
+                },
+                "SubnetId": {
+                    "Ref": "pubsubnet"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFVPC1NATGateway"
+                    }
+                ]
+            }
+        },
+        "VPC1NATGatewayEIP": {
+            "Type": "AWS::EC2::EIP"
+        }
+    },
+    "Outputs": {
+        "VPC1internetGateway": {
+            "Value": {
+                "Ref": "VPC1internetGateway"
+            }
+        },
+        "VPC1NATGateway": {
+            "Value": {
+                "Ref": "VPC1NATGateway"
+            }
+        }
+    }
+}

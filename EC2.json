@@ -1,0 +1,202 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "EC2serverInstancesize": {
+            "Default": "t2.micro",
+            "Type": "String",
+            "Description": "EC2serverInstancesize"
+        },
+        "privsubnet": {
+            "Description": "privatesubnet id",
+            "Type": "String"
+        },
+        "pubsubnet": {
+            "Description": "publicsubnet id",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "serverEC2KeyPair": {
+            "Type": "AWS::EC2::KeyPair",
+            "Properties": {
+                "KeyName": "serverEC2KeyPair",
+                "KeyFormat": "pem",
+                "KeyType": "rsa"
+            }
+        },
+        "serverEC2sg": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security group for serverEC2",
+                "GroupName": "serverEC2sg",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "TCP",
+                        "FromPort": 22,
+                        "ToPort": 22,
+                        "SourceSecurityGroupId": {
+                            "Fn::GetAtt": [
+                                "BastionhostEC2sg",
+                                "GroupId"
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFserverEC2sg"
+                    }
+                ]
+            }
+        },
+        "serverEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "KeyName": {
+                    "Ref": "serverEC2KeyPair"
+                },
+                "ImageId": "ami-00b8917ae86a424c9",
+                "InstanceType": {
+                    "Ref": "EC2serverInstancesize"
+                },
+                "Monitoring": "false",
+                "SubnetId": {
+                    "Ref": "privsubnet"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "serverEC2sg"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFserverEC2"
+                    }
+                ]
+            }
+        },
+        "BastionhostEC2sg": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security group for serverEC2",
+                "GroupName": "BastionhostEC2sg",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "TCP",
+                        "FromPort": 22,
+                        "ToPort": 22,
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFBastionhostEC2sg"
+                    }
+                ]
+            }
+        },
+        "BastionhostEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "KeyName": {
+                    "Ref": "serverEC2KeyPair"
+                },
+                "ImageId": "ami-00b8917ae86a424c9",
+                "InstanceType": "t2.micro",
+                "Monitoring": "false",
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "True",
+                        "DeleteOnTermination": "True",
+                        "SubnetId": {
+                            "Ref": "pubsubnet"
+                        },
+                        "DeviceIndex": "0",
+                        "GroupSet": [
+                            {
+                                "Ref": "BastionhostEC2sg"
+                            }
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFBastionHostEC2"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "serverEC2sg": {
+            "Value": {
+                "Ref": "serverEC2sg"
+            }
+        },
+        "serverEC2": {
+            "Value": {
+                "Ref": "serverEC2"
+            }
+        }
+    }
+}

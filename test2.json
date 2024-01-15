@@ -1,0 +1,249 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Default": "vpc-09b36382d6f1ace3a",
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "privsubnet": {
+            "Default": "subnet-01d10141223e01ec6",
+            "Description": "privatesubnet id",
+            "Type": "String"
+        },
+        "privsubnet2": {
+            "Default": "subnet-084f98e795fb452c9",
+            "Description": "privatesubnet id",
+            "Type": "String"
+        },
+        "pubsubnet": {
+            "Default": "subnet-0d85a6b2ba09db4cb",
+            "Description": "publicsubnet id",
+            "Type": "String"
+        },
+        "VPC1internetGateway": {
+            "Default": "igw-0d4738a8416a82f0c",
+            "Type": "String",
+            "Description": "Name of internet gateway"
+        },
+        "VPC1NATGateway": {
+            "Default": "nat-0a62680a77af8815c",
+            "Type": "String",
+            "Description": "Name of NAT gateway"
+        },
+        "EC2serverInstancesize": {
+            "Default": "t2.micro",
+            "Type": "String",
+            "Description": "EC2serverInstancesize"
+        },
+        "serverEC2sg": {
+            "Default": "sg-0bb6eb5be43921aaa",
+            "Description": "serverEC2sg",
+            "Type": "String"
+        },
+        "MySqlRDSBBIdentifier": {
+            "Default": "CFMySqlRDS",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSName": {
+            "Default": "Master",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlDBInstanceClass": {
+            "Default": "db.m5.large",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSStorage": {
+            "Default": 20,
+            "Description": "DB Name to Indentify RDS",
+            "Type": "Number"
+        },
+        "MySqlRDSUsername": {
+            "Default": "admin",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSPassword": {
+            "Default": "admin123",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "WAFWebIPSet": {
+            "Type": "AWS::WAFv2::IPSet",
+            "Properties": {
+              "Name": "CFWAFWebIPSet",
+              "Description": "My IP Set description",
+              "Scope": "CLOUDFRONT",
+              "IPAddressVersion": "IPV4",
+              "Addresses": [
+                "10.5.26.146/32"
+              ]
+            }
+          },
+          "WAFRuleGroup": {
+            "Type": "AWS::WAFv2::RuleGroup",
+            "Properties": {
+              "Name": "CFWAFRuleGroup",
+              "Scope": "CLOUDFRONT",
+              "Description": "SampleRuleGroup",
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "SampleRuleGroupMetrics"
+              },
+              "CustomResponseBodies": {
+                "CustomResponseBodyKey1": {
+                  "ContentType": "TEXT_PLAIN",
+                  "Content": "this is a plain text"
+                },
+                "CustomResponseBodyKey2": {
+                  "ContentType": "APPLICATION_JSON",
+                  "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+                },
+                "CustomResponseBodyKey3": {
+                  "ContentType": "TEXT_HTML",
+                  "Content": "<html>HTML text content</html>"
+                }
+              },
+              "Capacity": 1000,
+              "Rules": [
+                {
+                  "Name": "test",
+                  "Priority": 0,
+                  "Action": {
+                    "Allow": {}
+                  },
+                  "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "test"
+                  },
+                  "Statement": {
+                    "IPSetReferenceStatement": {
+                      "ARN": {
+                        "Fn::GetAtt": [
+                          "WAFWebIPSet",
+                          "Arn"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "WebACL": {
+            "Type": "AWS::WAFv2::WebACL",
+            "Properties": {
+              "Name": "CFWebACL1",
+              "Scope": "CLOUDFRONT",
+              "Description": "This is an example WebACL",
+              "DefaultAction": {
+                "Allow": {
+                  "CustomRequestHandling": {
+                    "InsertHeaders": [
+                      {
+                        "Name": "AllowActionHeader1Name",
+                        "Value": "AllowActionHeader1Value"
+                      },
+                      {
+                        "Name": "AllowActionHeader2Name",
+                        "Value": "AllowActionHeader2Value"
+                      }
+                    ]
+                  }
+                }
+              },
+              "VisibilityConfig": {
+                "SampledRequestsEnabled": true,
+                "CloudWatchMetricsEnabled": true,
+                "MetricName": "ExampleWebACLMetric"
+              },
+              "CustomResponseBodies": {
+                "CustomResponseBodyKey1": {
+                  "ContentType": "TEXT_PLAIN",
+                  "Content": "this is a plain text"
+                },
+                "CustomResponseBodyKey2": {
+                  "ContentType": "APPLICATION_JSON",
+                  "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+                },
+                "CustomResponseBodyKey3": {
+                  "ContentType": "TEXT_HTML",
+                  "Content": "<html>HTML text content</html>"
+                }
+              },
+              "Rules": [
+                {
+                  "Name": "RuleWithAWSManagedRules",
+                  "Priority": 0,
+                  "Statement": {
+                    "ManagedRuleGroupStatement": {
+                      "VendorName": "AWS",
+                      "Name": "AWSManagedRulesCommonRuleSet"
+                    }
+                  },
+                  "OverrideAction": {
+                    "Count": {}
+                  },
+                  "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "RuleWithAWSManagedRulesMetric"
+                  }
+                },
+                {
+                  "Name": "test",
+                  "Priority": 1,
+                  "Statement": {
+                    "RuleGroupReferenceStatement": {
+                      "ARN": {
+                        "Fn::GetAtt": [
+                          "WAFRuleGroup",
+                          "Arn"
+                        ]
+                      }
+                    }
+                  },
+                  "OverrideAction": {
+                    "None": {}
+                  },
+                  "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "test"
+                  }
+                }
+              ]
+            }
+          },
+          "MyWebACLAssociation": {
+            "Type": "AWS::WAFv2::WebACLAssociation",
+            "Properties": {
+              "WebACLArn": { "Fn::GetAtt": ["WebACL", "Arn"] },
+              "ResourceArn": { "Fn::Sub":"arn:aws:cloudfront::${AWS::AccountId}:distribution/${MyCloudFrontDistribution}"}
+            }
+          }
+          
+        },
+    "Outputs": {}
+}

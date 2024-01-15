@@ -1,0 +1,181 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "privsubnet": {
+            "Description": "privatesubnet id",
+            "Type": "String"
+        },
+        "privsubnet2": {
+            "Description": "privatesubnet2 id",
+            "Type": "String"
+        },
+        "pubsubnet": {
+            "Description": "publicsubnet id",
+            "Type": "String"
+        },
+        "VPC1internetGateway": {
+            "Type": "String",
+            "Description": "Name of internet gateway"
+        },
+        "VPC1NATGateway": {
+            "Type": "String",
+            "Description": "Name of NAT gateway"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "privsubnetrouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFprivsubnetrouteTable"
+                    }
+                ]
+            }
+        },
+        "privsubnetrouteTableAssoc": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "privsubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "privsubnetrouteTable"
+                }
+            }
+        },
+        "privsubnetrouteTableRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "privsubnetrouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": {
+                    "Ref": "VPC1NATGateway"
+                }
+            }
+        },
+        "privsubnet2routeTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFprivsubnet2routeTable"
+                    }
+                ]
+            }
+        },
+        "privsubnet2routeTableAssoc": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "privsubnet2"
+                },
+                "RouteTableId": {
+                    "Ref": "privsubnet2routeTable"
+                }
+            }
+        },
+        "privsubnet2routeTableRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "privsubnet2routeTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": {
+                    "Ref": "VPC1NATGateway"
+                }
+            }
+        },
+        "pubsubnetrouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFpubsubnetrouteTable"
+                    }
+                ]
+            }
+        },
+        "pubsubnetrouteTableAssoc": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "pubsubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "pubsubnetrouteTable"
+                }
+            }
+        },
+        "pubsubnetrouteTableRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "pubsubnetrouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "VPC1internetGateway"
+                }
+            }
+        }
+    },
+    "Outputs": {}
+}

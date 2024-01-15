@@ -1,0 +1,151 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "privsubnetcidrBlock": {
+            "Default": "10.1.1.0/24",
+            "Description": "CIDR block for Private Subnet",
+            "Type": "String"
+        },
+        "privsubnet2cidrBlock": {
+            "Default": "10.1.3.0/24",
+            "Description": "CIDR block for Private Subnet",
+            "Type": "String"
+        },
+        "pubsubnetcidrBlock": {
+            "Default": "10.1.2.0/24",
+            "Description": "CIDR block for for Public Subnet",
+            "Type": "String"
+        },
+        "availablityZone1": {
+            "Default": "us-east-1f",
+            "Description": "Avilability Zone1 for Subnet",
+            "Type": "String"
+        },
+        "availablityZone2": {
+            "Default": "us-east-1e",
+            "Description": "Avilability Zone2 for Subnet",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "privsubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "availablityZone1"
+                },
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "CidrBlock": {
+                    "Ref": "privsubnetcidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFprivsubnet"
+                    }
+                ]
+            }
+        },
+        "privsubnet2": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "availablityZone2"
+                },
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "CidrBlock": {
+                    "Ref": "privsubnet2cidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFprivsubnet2"
+                    }
+                ]
+            }
+        },
+        "pubsubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "availablityZone1"
+                },
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "CidrBlock": {
+                    "Ref": "pubsubnetcidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFpubsubnet"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "privsubnet": {
+            "Value": {
+                "Ref": "privsubnet"
+            }
+        },
+        "pubsubnet": {
+            "Value": {
+                "Ref": "pubsubnet"
+            }
+        },
+        "privsubnet2": {
+            "Value": {
+                "Ref": "privsubnet2"
+            }
+        }
+    }
+}

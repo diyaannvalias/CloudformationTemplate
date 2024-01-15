@@ -1,0 +1,172 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {},
+    "Parameters": {
+        "VPC1": {
+            "Type": "String",
+            "Description": "VPC1 id"
+        },
+        "tagKey": {
+            "Default": "Usage",
+            "Description": "TagKey to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "tagValue": {
+            "Default": "cloudformationtest",
+            "Description": "TagValue to assign for all resources created using this template",
+            "Type": "String"
+        },
+        "privsubnet": {
+            "Description": "privatesubnet id",
+            "Type": "String"
+        },
+        "privsubnet2": {
+            "Description": "privatesubnet2 id",
+            "Type": "String"
+        },
+        "pubsubnet": {
+            "Description": "publicsubnet id",
+            "Type": "String"
+        },
+        "serverEC2sg": {
+            "Description": "serverEC2sg",
+            "Type": "String"
+        },
+        "MySqlRDSBBIdentifier":{
+            "Default":"CFMySqlRDS",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSName":{
+            "Default":"Master",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlDBInstanceClass":{
+            "Default":"db.m5.large",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSStorage":{
+            "Default":20,
+            "Description": "DB Name to Indentify RDS",
+            "Type": "Number"
+        },
+        "MySqlRDSUsername":{
+            "Default":"admin",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        },
+        "MySqlRDSPassword":{
+            "Default":"admin123",
+            "Description": "DB Name to Indentify RDS",
+            "Type": "String"
+        }
+    },
+    "Mappings": {},
+    "Conditions": {},
+    "Resources": {
+        "mySQLRDSsg": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security group for mySQL RDS",
+                "GroupName": "mySQLRDSsg",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "TCP",
+                        "FromPort": 3306,
+                        "ToPort": 3306,
+                        "SourceSecurityGroupId":
+                            {
+                                "Ref": "serverEC2sg"
+                            }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC1"
+                },
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "mySQLRDSsg"
+                    }
+                ]
+            }
+        },
+        "RDSSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "Subnetgroup for RDS",
+                "SubnetIds": [
+                    {
+                        "Ref": "privsubnet"
+                    },
+                    {
+                        "Ref": "privsubnet2"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": {
+                            "Ref": "tagKey"
+                        },
+                        "Value": {
+                            "Ref": "tagValue"
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "CFRDSSubnetGroup"
+                    }
+                ]
+            }
+        },
+        "MySqlRDS": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBInstanceIdentifier": {
+                    "Ref": "MySqlRDSBBIdentifier"
+                },
+                "DBName": {
+                    "Ref": "MySqlRDSName"
+                },
+                "DBInstanceClass": {
+                    "Ref": "MySqlDBInstanceClass"
+                },
+                "AllocatedStorage": {
+                    "Ref": "MySqlRDSStorage"
+                },
+                "Engine": "MySQL",
+                "EngineVersion": "8.0.33",
+                "MasterUsername": {
+                    "Ref": "MySqlRDSUsername"
+                },
+                "MasterUserPassword": {
+                    "Ref": "MySqlRDSPassword"
+                },
+                "VPCSecurityGroups": [
+                    {"Ref":"mySQLRDSsg"}
+                ],
+                "DBSubnetGroupName": {"Ref":"RDSSubnetGroup"},
+                "MultiAZ": "false",
+                "PubliclyAccessible": "false",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "CFMySqlRDS"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {}
+}
