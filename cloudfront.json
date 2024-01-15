@@ -85,20 +85,7 @@
           "Scope": "CLOUDFRONT",
           "Description": "This is an example WebACL",
           "DefaultAction": {
-            "Allow": {
-              "CustomRequestHandling": {
-                "InsertHeaders": [
-                  {
-                    "Name": "AllowActionHeader1Name",
-                    "Value": "AllowActionHeader1Value"
-                  },
-                  {
-                    "Name": "AllowActionHeader2Name",
-                    "Value": "AllowActionHeader2Value"
-                  }
-                ]
-              }
-            }
+            "Block": {}
           },
           "VisibilityConfig": {
             "SampledRequestsEnabled": true,
