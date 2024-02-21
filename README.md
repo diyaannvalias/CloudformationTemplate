@@ -18,6 +18,7 @@ aws cloudformation package \
 # Creating Cliudformation stack
 
 When adding IAM role to stack makesure you have added the below portion in the IAM role trustrelationship. Else the role wont appear in the dropdown
+  
    {
       "Effect": "Allow",
       "Principal": {
