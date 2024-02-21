@@ -14,3 +14,15 @@ aws cloudformation package \
   --s3-bucket mybucket \
   --output-template-file packaged-template.json \
   --use-json
+
+# Creating Cliudformation stack
+
+When adding IAM role to stack makesure you have added the below portion in the IAM role trustrelationship. Else the role wont appear in the dropdown
+   {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudformation.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+    
