@@ -9,11 +9,7 @@
 
 # To package and upload cloudformation template to s3
 
-aws cloudformation package \
-  --template /path_to_template/template.json \
-  --s3-bucket mybucket \
-  --output-template-file packaged-template.json \
-  --use-json
+aws cloudformation package --template-file /path_to_template/template.json --s3-bucket mybucket --output-template-file packaged-template.json --use-json
 
 # Creating Cliudformation stack
 
